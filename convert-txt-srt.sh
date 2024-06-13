@@ -7,11 +7,27 @@ fi
 # Получаем имя входного файла
 input_file=$1
 
-# Получаем имя выходного файла
-output_file="${input_file%.*}.srt"
+# Получаем расширение входного файла
+input_ext=$2
 
+# Разделитель между миллисекундами в субтитрах srt - "," vtt - "."
+if [ "$input_ext" == "vtt" ]; then
+    # Генерация для vtt
+    input_ext="vtt"
+    splitter="."
+else
+    # Генерация для srt
+    input_ext="srt"
+    splitter=","
+fi
+
+output_file="${input_file%.*}.${input_ext}"
 # Очистка файла, если он уже существует
 echo "" > "$output_file"
+
+if [ "$input_ext" == "vtt" ]; then
+  echo "WEBVTT" > "$output_file"
+fi
 
 # Счетчик субтитров
 counter=1
@@ -28,8 +44,8 @@ do
         start_time=$(echo "$line" | awk -F'-' '{print $1}')
         end_time=$(echo "$line" | awk -F'-' '{print $2}')
         # Преобразуем начало и конец интервала в формат SRT субтитров
-        start_srt=$(echo "$start_time" | awk -F':' '{printf "%02d:%02d:%02d,%02d0", int($1), int($2), int($3), int($4)}')
-        end_srt=$(echo "$end_time" | awk -F':' '{printf "%02d:%02d:%02d,%02d0", int($1), int($2), int($3), int($4)}')
+        start_srt=$(echo "$start_time" | awk -v splitter="$splitter" -F':' '{printf "%02d:%02d:%02d'$splitter'%02d0", int($1), int($2), int($3), int($4)}')
+        end_srt=$(echo "$end_time" | awk -v splitter="$splitter" -F':' '{printf "%02d:%02d:%02d'$splitter'%02d0", int($1), int($2), int($3), int($4)}')
 
         # Создаем временной интервал в формате SRT
         time="$start_srt --> $end_srt"
@@ -41,7 +57,7 @@ do
           fi
 
         # Добавляем пробел между субтитрами
-        if [[ $counter -gt 1 ]]; then
+        if [[ $counter -gt 1 ]] || [[ $input_ext == "vtt" ]]; then
           echo "" >> "$output_file"
         fi
 
