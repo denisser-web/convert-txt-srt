@@ -8,8 +8,8 @@ Input time format HH:MM:SS:FF - HH:MM:SS:FF
 Run:
 
 ```
-./convert-txt-srt.sh file.srt
-./convert-txt-srt.sh file.srt vtt // for WEBVTT
+./convert-txt-srt.sh file.txt
+./convert-txt-srt.sh file.txt vtt // for WEBVTT
 ```
 
 This will output a `file.srt` or `file.vtt` file.
